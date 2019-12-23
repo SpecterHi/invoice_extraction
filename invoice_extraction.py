@@ -67,5 +67,9 @@ class InvoiceExtraction:
 
     def extract(self, file_path):
         ret = dict(self.extract_pdf_info(file_path), **self.extract_qrcode_info(file_path))
+        if ret['价税合计(小写)'] == None:
+               ret['价税合计(小写)'] = 0
+        if float(ret['价税合计(小写)']) < float(ret['金额']):
+            ret['价税合计(小写)'] = round((float(ret['价税合计(小写)']) + float(ret['金额'])),2)
         ret['文件名'] = os.path.split(file_path)[1]
         return ret
