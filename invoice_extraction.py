@@ -7,6 +7,39 @@ from datetime import datetime
 import os
 import re
 from subprocess import check_output
+table={
+    "整":"+0",
+    "零":"+0",
+    "壹":"+1",
+    "贰":"+2",
+    "叁":"+3",
+    "肆":"+4",
+    "伍":"+5",
+    "陆":"+6",
+    "柒":"+7",
+    "捌":"+8",
+    "玖":"+9",
+    "分":"*0.01",
+    "角":"*0.1",
+    "圆":"*1",
+    "元":"*1",
+    "拾":"*10",
+    "十":"*10",
+    "百":"*100",
+    "佰":"*100",
+    "千":"*1000",
+    "仟":"*1000",
+    "万":"*10000",
+    "萬":"*10000",
+    "亿":"*100000000"
+}
+
+import re
+def rmb2arb(s):
+    s=re.sub(r'(.+?)([亿万])',r'+(\1)\2',s)
+    for k in set(s)-set('()+'):
+        s=s.replace(k,table[k])
+    return eval(s)
 
 class InvoiceExtraction:
     qrcode_keys = [
@@ -57,6 +90,7 @@ class InvoiceExtraction:
                 mt = self.regex_element[key].search(text)
                 if mt:
                     ret[key] = mt.groupdict()['field']
+            print(ret)
             ret['价税合计(小写)'] = eval(ret.get('价税合计(小写)','None'))
             ret['密码区'] = ret.get('密码区','').replace(' ','').replace('\n','')
             ret['价税合计(大写)'] = ret.get('价税合计(大写)','').replace(' ','')
@@ -67,9 +101,11 @@ class InvoiceExtraction:
 
     def extract(self, file_path):
         ret = dict(self.extract_pdf_info(file_path), **self.extract_qrcode_info(file_path))
-        if ret['价税合计(小写)'] == None:
-               ret['价税合计(小写)'] = 0
+        if ret['价税合计(小写)'] == None: 
+               ret['价税合计(小写)'] = 0 #如果无法识别出来就先置0，例如税额为0（免税）的情况
         if float(ret['价税合计(小写)']) < float(ret['金额']):
-            ret['价税合计(小写)'] = round((float(ret['价税合计(小写)']) + float(ret['金额'])),2)
+            ret['价税合计(小写)'] = round((float(ret['价税合计(小写)']) + float(ret['金额'])),2) #如果合计小于金额就说明把税额识别成了合计，所以用税额+金额=合计
+        if float(ret['价税合计(小写)']) != float(rmb2arb(ret['价税合计(大写)'])):
+            ret['价税合计(小写)'] = round(float(rmb2arb(ret['价税合计(大写)'])),2) #如果遇到税额错误识别为0的情况，导致上一步处理结果和大写转换的结果不一致，相信大写。
         ret['文件名'] = os.path.split(file_path)[1]
         return ret
