@@ -20,10 +20,18 @@
 
 ## 2. 安装说明
 本程序仅在`MacOS`搭配`python3`上测试过。  
-程序依赖包括`zbarlight`、`PyMuPDF`用于二维码识别法，`pdfminer.six`用于PDF文本正则法。然而这三个无法简单地通过`pip`安装。具体安装方法参见：  
+程序依赖包括`zbarlight`、`PyMuPDF`用于二维码识别法，`pdfminer.six`用于PDF文本正则法。
+首先
+```
+apt-get install libzbar0 libzbar-dev
+```
+然后通过`pip`安装。
+
+更多信息：
+
  - `zbarlight`：[https://pypi.org/project/zbarlight/](https://pypi.org/project/zbarlight/)  
  - `PyMuPDF`：[https://pypi.org/project/PyMuPDF/](https://pypi.org/project/PyMuPDF/)  
- - `pdfminer`：[https://euske.github.io/pdfminer/index.html](https://euske.github.io/pdfminer/index.html)  
+ 
 其他依赖通过`pip`安装即可： 
 
 ```
@@ -31,7 +39,7 @@ pip install pillow pandas
 ```
 
 ## 3. 使用说明
-需要提供含PDF电子发票的文件夹路径和输出的excel文件名：
+需要提供含PDF电子发票的文件夹路径和输出的excel文件名，更多参数看main.py：
 
 ```
 python3 main.py -i /path/to/pdf/invoice -o output.xlsx
